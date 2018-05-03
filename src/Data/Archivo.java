@@ -20,13 +20,16 @@ import java.util.List;
  * @author Pablo Castillo
  */
 public class Archivo {
-      private String path;
-    
-    public Archivo(){
-        this.path="ArchivoLibros";
+
+    private String path;
+
+    public Archivo() {
+//        this.path="ArchivoLibros";
     }
-    public void guardarLibro(ImageData libro) throws IOException, ClassNotFoundException {
-        File myFile = new File(this.path);
+
+    public void guardarLibro(ImageData libro, String path) throws IOException, ClassNotFoundException {
+        this.path = path;
+        File myFile = new File(path);
         List<ImageData> listaLibros = new ArrayList<ImageData>();
 
         if (myFile.exists()) {
@@ -40,5 +43,19 @@ public class Archivo {
         ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(myFile));
         output.writeUnshared(listaLibros);
         output.close();
-    }//guardarPersona
+    }//guardarPersona\
+
+    public List<ImageData> arrays() throws IOException, ClassNotFoundException {
+        File myFile = new File(this.path);
+
+        List<ImageData> personaList = new ArrayList<ImageData>();
+        if (myFile.exists()) {
+            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(myFile));
+            Object aux = objectInputStream.readObject();
+            personaList = (List<ImageData>) aux;
+            objectInputStream.close();
+        }//if(myFile.exists())
+
+        return personaList;
+    }//obtenerPersona
 }

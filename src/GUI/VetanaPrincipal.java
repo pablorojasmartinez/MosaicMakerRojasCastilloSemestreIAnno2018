@@ -55,7 +55,7 @@ public class VetanaPrincipal extends Application {
     private Menu menu;
     private MenuItem item;
     private MenuItem loadImage;
-    private TextField texto, tetxoCanvas2;
+    private TextField texto, tetxoCanvas2,txtNombre;
     private Label label, labelCan;
     private Button boton, boton2, btnFlip, btnRotate, btnSavedIamge, btnSave;
     int PixelNumber;
@@ -229,6 +229,8 @@ public class VetanaPrincipal extends Application {
 
                     btnRotate.setVisible(true);
                     btnFlip.setVisible(true);
+                    btnSavedIamge.setVisible(true);
+                      btnSave.setVisible(true);
 
                 } catch (IOException ex) {
                     Logger.getLogger(VetanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
@@ -251,7 +253,7 @@ public class VetanaPrincipal extends Application {
         boton.setLayoutY(30);
         boton.setVisible(false);
 
-        canvas2 = new Canvas(2000, 2000);
+        canvas2 = new Canvas(1000, 1000);
 
         tetxoCanvas2 = new TextField();
         tetxoCanvas2.setLayoutX(800);
@@ -262,6 +264,10 @@ public class VetanaPrincipal extends Application {
         labelCan.setLayoutX(750);
         labelCan.setLayoutY(30);
         this.labelCan.setVisible(false);
+        
+          txtNombre = new TextField();
+        txtNombre.setLayoutX(1100);
+        txtNombre.setLayoutY(650);
 
         boton2 = new Button("Accept");
         boton2.setLayoutX(950);
@@ -289,10 +295,12 @@ public class VetanaPrincipal extends Application {
         btnSavedIamge = new Button("Saved Image");
         btnSavedIamge.setLayoutY(650);
         btnSavedIamge.setLayoutX(650);
+        btnSavedIamge.setVisible(false);
         btnSave = new Button("Save");
         btnSave.setLayoutY(650);
         btnSave.setLayoutX(1050);
         this.snapshot = new SnapshotParameters();
+        btnSave.setVisible(false);
 
         gc = canvas2.getGraphicsContext2D();
         gc.setStroke(Color.GRAY);
@@ -311,6 +319,7 @@ public class VetanaPrincipal extends Application {
         this.root.getChildren().add(this.canvas);
         this.root.getChildren().add(this.canvas2);
         this.root.getChildren().add(this.texto);
+        this.root.getChildren().add(this.txtNombre);
         this.root.getChildren().add(this.label);
         this.root.getChildren().add(this.boton);
         this.root.getChildren().add(this.btnRotate);
@@ -329,12 +338,12 @@ public class VetanaPrincipal extends Application {
     EventHandler<ActionEvent> btnSave1 = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-            try {
+          try {
                 Archivo archivo = new Archivo();
                 ImageData imageData;
                 imageData = new ImageData(path, path2, PixelNumber, tamanoMatr);
 
-                archivo.guardarLibro(imageData);
+                archivo.guardarLibro(imageData, txtNombre.getText());
             } catch (IOException ex) {
                 Logger.getLogger(VetanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ClassNotFoundException ex) {
@@ -375,8 +384,6 @@ public class VetanaPrincipal extends Application {
     EventHandler<ActionEvent> buttonActionFlip = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-
-            System.err.println("Esta mierda aún no sirve");
             Tablero tablero = buscarLugarTableroConImagenes(xPressed, yPressed);
             flipImage(gc, tablero);
         }
