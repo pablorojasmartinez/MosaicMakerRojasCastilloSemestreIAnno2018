@@ -1,9 +1,9 @@
 package GUI;
 
-import Data.Archivo;
+import Data.DataFile;
 import Domain.CutOutImage;
 import Domain.ImageData;
-import Domain.Tablero;
+import Domain.Board;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -44,7 +44,7 @@ import javax.swing.JOptionPane;
  *
  * @author Pablo Castillo
  */
-public class VetanaPrincipal extends Application {
+public class MainWindow extends Application {
 
     private final int WIDTH = 1400;
     private final int HEIGHT = 700;
@@ -55,9 +55,9 @@ public class VetanaPrincipal extends Application {
     private Menu menu;
     private MenuItem item;
     private MenuItem loadImage;
-    private TextField texto, tetxoCanvas2,txtNombre;
+    private TextField text, textCanvas,txtName;
     private Label label, labelCan;
-    private Button boton, boton2, btnFlip, btnRotate, btnSavedIamge, btnSave;
+    private Button button, button2, btnFlip, btnRotate, btnSavedIamge, btnSave;
     int PixelNumber;
     Image image;
     GraphicsContext gc;
@@ -65,9 +65,9 @@ public class VetanaPrincipal extends Application {
     private WritableImage writable; //convierte pixeles en una imagen
     private PixelReader pixel;
     Stage stage;
-    CutOutImage matriz[][];
-    CutOutImage matrizTablero[][];
-    Tablero mat[][];
+    CutOutImage[][] matrix;
+    CutOutImage[][] boardMatrix;
+    Board mat[][];
     CutOutImage cut;
     int xPressed;
     int yPressed;
@@ -75,7 +75,7 @@ public class VetanaPrincipal extends Application {
     private SnapshotParameters snapshot;
     String path = "";
     String path2 = "";
-    int tamanoMatr;
+    int matrixSize;
 
     @Override
     /*constructor mas o menos*/
@@ -92,7 +92,7 @@ public class VetanaPrincipal extends Application {
             public void handle(MouseEvent mouseEvent) {
                 int valorx = (int) mouseEvent.getX();
                 int valory = (int) mouseEvent.getY();
-                cut = buscarTrozoImagen(valorx, valory);
+                cut = searchCutImage(valorx, valory);
             }
         });
 
@@ -100,37 +100,37 @@ public class VetanaPrincipal extends Application {
             @Override
             public void handle(MouseEvent mouseEvent) {
 
-                int valorx = (int) mouseEvent.getX();
-                int valory = (int) mouseEvent.getY();
+                int valueX = (int) mouseEvent.getX();
+                int valueY = (int) mouseEvent.getY();
 
-                Tablero tablero = buscarLugarTablero(valorx, valory);
+                Board board = boardSearchPlace(valueX, valueY);
                 if (mouseEvent.getButton() == MouseButton.PRIMARY) {
                     if (cut.getWritable() != null) {
 //                        mat[tablero.getFila()][tablero.getColumna()].setWritable(cut.getWritable());
-                        draw2(gc, cut, tablero);
+                        draw2(gc, cut, board);
 
                     }
                 } else if (mouseEvent.getButton() == MouseButton.MIDDLE) {
-                    draw2Deleted(gc, cut, tablero);
+                    draw2Deleted(gc, cut, board);
                 } else if (mouseEvent.getButton() == MouseButton.SECONDARY) {
-                    xPressed = valorx;
-                    yPressed = valory;
+                    xPressed = valueX;
+                    yPressed = valueY;
                 }
             }
         });
 
     }//start
 
-    public CutOutImage buscarTrozoImagen(int x, int y) {
-        CutOutImage tab;
-        for (int i = 0; i < matriz.length - 1; i++) {
-            for (int j = 0; j < matriz[i].length; j++) {
-                if (matriz[i][j].getX() <= x) {
-                    if (matriz[i][j].getY() <= y) {
-                        if (x <= matriz[i][j].getSize() + matriz[i][j].getX()) {
-                            if (y <= matriz[i][j].getSize() + matriz[i][j].getY()) {
-                                tab = new CutOutImage(matriz[i][j].getX(), matriz[i][j].getY(), matriz[i][j].getWritable(), matriz[i][j].getSize());
-                                return tab;
+    public CutOutImage searchCutImage(int x, int y) {
+        CutOutImage board;
+        for (int i = 0; i < matrix.length - 1; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                if (matrix[i][j].getX() <= x) {
+                    if (matrix[i][j].getY() <= y) {
+                        if (x <= matrix[i][j].getSize() + matrix[i][j].getX()) {
+                            if (y <= matrix[i][j].getSize() + matrix[i][j].getY()) {
+                                board = new CutOutImage(matrix[i][j].getX(), matrix[i][j].getY(), matrix[i][j].getWritable(), matrix[i][j].getSize());
+                                return board;
                             }
                         }
                     }
@@ -140,16 +140,16 @@ public class VetanaPrincipal extends Application {
         return null;
     }
 
-    public Tablero buscarLugarTablero(int x, int y) {
-        Tablero tab;
+    public Board boardSearchPlace(int x, int y) {
+        Board board;
         for (int i = 0; i < mat.length; i++) {
             for (int j = 0; j < mat[i].length; j++) {
                 if (mat[i][j].getX() <= x) {
                     if (mat[i][j].getY() <= y) {
                         if (x <= mat[i][j].getSize() + mat[i][j].getX()) {
                             if (y <= mat[i][j].getSize() + mat[i][j].getY()) {
-                                tab = new Tablero(mat[i][j].getX(), mat[i][j].getY(), mat[i][j].getSize(), mat[i][j].getFila(), mat[i][j].getColumna(), null);
-                                return tab;
+                                board = new Board(mat[i][j].getX(), mat[i][j].getY(), mat[i][j].getSize(), mat[i][j].getFila(), mat[i][j].getColumna(), null);
+                                return board;
                             }
                         }
                     }
@@ -159,16 +159,16 @@ public class VetanaPrincipal extends Application {
         return null;
     }
 
-    public Tablero buscarLugarTableroConImagenes(int x, int y) {
-        Tablero tab;
+    public Board searchPlaceWithImages(int x, int y) {
+        Board board;
         for (int i = 0; i < mat.length; i++) {
             for (int j = 0; j < mat[i].length; j++) {
                 if (mat[i][j].getX() <= x) {
                     if (mat[i][j].getY() <= y) {
                         if (x <= mat[i][j].getSize() + mat[i][j].getX()) {
                             if (y <= mat[i][j].getSize() + mat[i][j].getY()) {
-                                tab = new Tablero(mat[i][j].getX(), mat[i][j].getY(), mat[i][j].getSize(), mat[i][j].getFila(), mat[i][j].getColumna(), mat[i][j].getWritable());
-                                return tab;
+                                board = new Board(mat[i][j].getX(), mat[i][j].getY(), mat[i][j].getSize(), mat[i][j].getFila(), mat[i][j].getColumna(), mat[i][j].getWritable());
+                                return board;
                             }
                         }
                     }
@@ -219,13 +219,13 @@ public class VetanaPrincipal extends Application {
                     path = file.getAbsolutePath();
                     BufferedImage bufferedImage = ImageIO.read(file);
                     image = SwingFXUtils.toFXImage(bufferedImage, null);
-                    texto.setVisible(true);
-                    boton.setVisible(true);
+                    text.setVisible(true);
+                    button.setVisible(true);
                     label.setVisible(true);
 
                     labelCan.setVisible(true);
-                    boton2.setVisible(true);
-                    tetxoCanvas2.setVisible(true);
+                    button2.setVisible(true);
+                    textCanvas.setVisible(true);
 
                     btnRotate.setVisible(true);
                     btnFlip.setVisible(true);
@@ -233,46 +233,46 @@ public class VetanaPrincipal extends Application {
                       btnSave.setVisible(true);
 
                 } catch (IOException ex) {
-                    Logger.getLogger(VetanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });
 
-        texto = new TextField();
-        texto.setLayoutX(100);
-        texto.setLayoutY(30);
-        texto.setVisible(false);
+        text = new TextField();
+        text.setLayoutX(100);
+        text.setLayoutY(30);
+        text.setVisible(false);
 
         label = new Label("Pixel");
         label.setLayoutX(60);
         label.setLayoutY(30);
         label.setVisible(false);
 
-        boton = new Button("Accept");
-        boton.setLayoutX(250);
-        boton.setLayoutY(30);
-        boton.setVisible(false);
+        button = new Button("Accept");
+        button.setLayoutX(250);
+        button.setLayoutY(30);
+        button.setVisible(false);
 
         canvas2 = new Canvas(1000, 1000);
 
-        tetxoCanvas2 = new TextField();
-        tetxoCanvas2.setLayoutX(800);
-        tetxoCanvas2.setLayoutY(30);
-        tetxoCanvas2.setVisible(false);
+        textCanvas = new TextField();
+        textCanvas.setLayoutX(800);
+        textCanvas.setLayoutY(30);
+        textCanvas.setVisible(false);
 
-        labelCan = new Label("Amunt");
+        labelCan = new Label("Amount");
         labelCan.setLayoutX(750);
         labelCan.setLayoutY(30);
         this.labelCan.setVisible(false);
         
-          txtNombre = new TextField();
-        txtNombre.setLayoutX(1100);
-        txtNombre.setLayoutY(650);
+          txtName = new TextField();
+        txtName.setLayoutX(1100);
+        txtName.setLayoutY(650);
 
-        boton2 = new Button("Accept");
-        boton2.setLayoutX(950);
-        boton2.setLayoutY(30);
-        boton2.setVisible(false);
+        button2 = new Button("Accept");
+        button2.setLayoutX(950);
+        button2.setLayoutY(30);
+        button2.setVisible(false);
 
         ScrollPane scroll2 = new ScrollPane();
         scroll2.setContent(canvas2);
@@ -292,7 +292,7 @@ public class VetanaPrincipal extends Application {
         btnFlip.setLayoutX(900);
         btnFlip.setVisible(false);
 
-        btnSavedIamge = new Button("Saved Image");
+        btnSavedIamge = new Button("Save Image");
         btnSavedIamge.setLayoutY(650);
         btnSavedIamge.setLayoutX(650);
         btnSavedIamge.setVisible(false);
@@ -307,8 +307,8 @@ public class VetanaPrincipal extends Application {
         gc.setFill(Color.LIGHTGRAY);
         gc.fillRect(0, 0, canvas2.getWidth(), canvas2.getHeight());
         this.btnSave.setOnAction(btnSave1);
-        this.boton2.setOnAction(buttonAction1);
-        this.boton.setOnAction(buttonAction);
+        this.button2.setOnAction(buttonAction1);
+        this.button.setOnAction(buttonAction);
         this.btnRotate.setOnAction(buttonActionRotate);
         this.btnFlip.setOnAction(buttonActionFlip);
         this.btnSavedIamge.setOnAction(btnSavedImage);
@@ -318,14 +318,14 @@ public class VetanaPrincipal extends Application {
         this.root.getChildren().add(this.labelCan);
         this.root.getChildren().add(this.canvas);
         this.root.getChildren().add(this.canvas2);
-        this.root.getChildren().add(this.texto);
-        this.root.getChildren().add(this.txtNombre);
+        this.root.getChildren().add(this.text);
+        this.root.getChildren().add(this.txtName);
         this.root.getChildren().add(this.label);
-        this.root.getChildren().add(this.boton);
+        this.root.getChildren().add(this.button);
         this.root.getChildren().add(this.btnRotate);
         this.root.getChildren().add(this.btnFlip);
-        this.root.getChildren().add(this.tetxoCanvas2);
-        this.root.getChildren().add(this.boton2);
+        this.root.getChildren().add(this.textCanvas);
+        this.root.getChildren().add(this.button2);
         this.root.getChildren().add(this.btnSavedIamge);
 
         GraphicsContext gc = this.canvas.getGraphicsContext2D();
@@ -339,15 +339,15 @@ public class VetanaPrincipal extends Application {
         @Override
         public void handle(ActionEvent event) {
           try {
-                Archivo archivo = new Archivo();
+                DataFile archivo = new DataFile();
                 ImageData imageData;
-                imageData = new ImageData(path, path2, PixelNumber, tamanoMatr);
+                imageData = new ImageData(path, path2, PixelNumber, matrixSize);
 
-                archivo.guardarLibro(imageData, txtNombre.getText());
+                archivo.saveFile(imageData, txtName.getText());
             } catch (IOException ex) {
-                Logger.getLogger(VetanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ClassNotFoundException ex) {
-                Logger.getLogger(VetanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         }
@@ -355,10 +355,10 @@ public class VetanaPrincipal extends Application {
     EventHandler<ActionEvent> buttonAction1 = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-            int cantidaFilaColum = Integer.parseInt(tetxoCanvas2.getText());
+            int cantidaFilaColum = Integer.parseInt(textCanvas.getText());
             draw3(gc, cantidaFilaColum);
-            tetxoCanvas2.setEditable(false);
-            boton2.setDisable(true);
+            textCanvas.setEditable(false);
+            button2.setDisable(true);
         }
     };
 
@@ -368,7 +368,7 @@ public class VetanaPrincipal extends Application {
             try {
                 exportImage();
             } catch (IOException ex) {
-                Logger.getLogger(VetanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     };
@@ -376,7 +376,7 @@ public class VetanaPrincipal extends Application {
     EventHandler<ActionEvent> buttonActionRotate = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-            Tablero tablero = buscarLugarTableroConImagenes(xPressed, yPressed);
+            Board tablero = searchPlaceWithImages(xPressed, yPressed);
             dibujarImagenRotada(gc, tablero);
         }
     };
@@ -384,7 +384,7 @@ public class VetanaPrincipal extends Application {
     EventHandler<ActionEvent> buttonActionFlip = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-            Tablero tablero = buscarLugarTableroConImagenes(xPressed, yPressed);
+            Board tablero = searchPlaceWithImages(xPressed, yPressed);
             flipImage(gc, tablero);
         }
     };
@@ -392,13 +392,13 @@ public class VetanaPrincipal extends Application {
     EventHandler<ActionEvent> buttonAction = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-            int numberPixel1 = Integer.parseInt(texto.getText());
+            int numberPixel1 = Integer.parseInt(text.getText());
             GraphicsContext gc = canvas.getGraphicsContext2D();
             GraphicsContext gc2 = canvas2.getGraphicsContext2D();
             draw(gc, numberPixel1);
             PixelNumber = numberPixel1;
             //  boton.setDisable(true);
-            texto.setEditable(false);
+            text.setEditable(false);
         }
     };
 
@@ -420,13 +420,13 @@ public class VetanaPrincipal extends Application {
         int anch = (int) (widthImage / numberPixel);
         int alto = (int) (largeImage / numberPixel);
 
-        matriz = new CutOutImage[alto][anch];
+        matrix = new CutOutImage[alto][anch];
         for (int i = 0; i < alto; i++) {
             for (int j = 0; j < anch; j++) {
                 if (widthImage > tamnoX && largeImage > tamanoY) {
                     if (largeImage - tamanoY > numberPixel) {
                         this.writable = new WritableImage(this.pixel, tamnoX, tamanoY, numberPixel, numberPixel); //Lee los pixeles (imagen, xInicio, yInicio, xFin, yFin)
-                        matriz[i][j] = new CutOutImage(x, y, writable, numberPixel);
+                        matrix[i][j] = new CutOutImage(x, y, writable, numberPixel);
                         gc.drawImage(this.writable, x, y);
                         x += numberPixel + 2;
                         tamnoX += numberPixel;
@@ -442,14 +442,14 @@ public class VetanaPrincipal extends Application {
         }
     }
 
-    private void draw2(GraphicsContext gc2, CutOutImage trozo, Tablero tablero) {
+    private void draw2(GraphicsContext gc2, CutOutImage trozo, Board tablero) {
         if (trozo.getWritable() != null && tablero != null) {
             gc2.drawImage(trozo.getWritable(), tablero.getX(), tablero.getY());
-             mat[tablero.getFila()][tablero.getColumna()] = new Tablero(tablero.getX(), tablero.getY(), tablero.getSize(), tablero.getFila(), tablero.getColumna(), trozo.getWritable());
+             mat[tablero.getFila()][tablero.getColumna()] = new Board(tablero.getX(), tablero.getY(), tablero.getSize(), tablero.getFila(), tablero.getColumna(), trozo.getWritable());
         }
     }
 
-    private void draw2Deleted(GraphicsContext gc2, CutOutImage trozo, Tablero tablero) {
+    private void draw2Deleted(GraphicsContext gc2, CutOutImage trozo, Board tablero) {
         if (trozo.getWritable() != null && tablero != null) {
             gc2.setFill(Color.LIGHTGREY);
             gc2.fillRect(tablero.getX(), tablero.getY(), tablero.getSize(), tablero.getSize());
@@ -461,14 +461,14 @@ public class VetanaPrincipal extends Application {
         int x = 0;
         int y = 0;
         int numberPixel = PixelNumber;
-        tamanoMatr = cantidad;
-        mat = new Tablero[cantidad][cantidad];
-        matrizTablero = new CutOutImage[cantidad][cantidad];
+        matrixSize = cantidad;
+        mat = new Board[cantidad][cantidad];
+        boardMatrix = new CutOutImage[cantidad][cantidad];
         for (int i = 0; i < cantidad; i++) {
             for (int j = 0; j < cantidad; j++) {
                 gc2.strokeRect(x, y, numberPixel, numberPixel);
-                mat[i][j] = new Tablero(x, y, numberPixel, i, j, null);
-                matrizTablero[i][j] = new CutOutImage(x, y, null, numberPixel);
+                mat[i][j] = new Board(x, y, numberPixel, i, j, null);
+                boardMatrix[i][j] = new CutOutImage(x, y, null, numberPixel);
                 x += numberPixel + 2;
             }
             y += numberPixel + 2;
@@ -476,7 +476,7 @@ public class VetanaPrincipal extends Application {
         }
     }
 
-    private void dibujarImagenRotada(GraphicsContext gc, Tablero tablero) {
+    private void dibujarImagenRotada(GraphicsContext gc, Board tablero) {
 
         WritableImage writable1;
 
@@ -493,7 +493,7 @@ public class VetanaPrincipal extends Application {
         mat[tablero.getFila()][tablero.getColumna()].setWritable(writable1);
     }
 
-    private void flipImage(GraphicsContext gc, Tablero tablero) {
+    private void flipImage(GraphicsContext gc, Board tablero) {
 
         WritableImage writable1;
 
@@ -520,12 +520,12 @@ public class VetanaPrincipal extends Application {
         File fileI = new File("imagen");
         ImageIO.write(SwingFXUtils.fromFXImage(imagenss, null), "png", file);
         String ruta = file.getAbsolutePath();
-        draw3(gc, tamanoMatr);
+        draw3(gc, matrixSize);
         path2 = ruta;
     }
 
     public void repintar() throws IOException {
-//         Tablero tablero = buscarLugarTablero(valorx, valory);
+//         Board tablero = boardSearchPlace(valorx, valory);
         for (int i = 0; i < mat.length; i++) {
             for (int j = 0; j < mat.length; j++) {
                 if (mat[j][i].getWritable() != null) {
@@ -536,10 +536,10 @@ public class VetanaPrincipal extends Application {
     }
     
     
-       private void drawNuevoPanel(GraphicsContext gc2, Tablero tablero) {
+       private void drawNuevoPanel(GraphicsContext gc2, Board tablero) {
         if (tablero.getWritable() != null && tablero != null) {
             gc2.drawImage(tablero.getWritable(), tablero.getX(), tablero.getY());
-//             mat[tablero.getFila()][tablero.getColumna()] = new Tablero(tablero.getX(), tablero.getY(), tablero.getSize(), tablero.getFila(), tablero.getColumna(), tablero.getWritable());
+//             mat[tablero.getFila()][tablero.getColumna()] = new Board(tablero.getX(), tablero.getY(), tablero.getSize(), tablero.getFila(), tablero.getColumna(), tablero.getWritable());
         }
     }
 }

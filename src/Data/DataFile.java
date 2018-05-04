@@ -19,43 +19,43 @@ import java.util.List;
  *
  * @author Pablo Castillo
  */
-public class Archivo {
+public class DataFile {
 
     private String path;
 
-    public Archivo() {
+    public DataFile() {
 //        this.path="ArchivoLibros";
     }
 
-    public void guardarLibro(ImageData libro, String path) throws IOException, ClassNotFoundException {
+    public void saveFile(ImageData libro, String path) throws IOException, ClassNotFoundException {
         this.path = path;
         File myFile = new File(path);
-        List<ImageData> listaLibros = new ArrayList<ImageData>();
+        List<ImageData> imageList = new ArrayList<ImageData>();
 
         if (myFile.exists()) {
             ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(myFile));
             Object aux = objectInputStream.readObject();
-            listaLibros = (List<ImageData>) aux;
+            imageList = (List<ImageData>) aux;
             objectInputStream.close();
         }//if(myFile.exists())
 
-        listaLibros.add(libro);
+        imageList.add(libro);
         ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(myFile));
-        output.writeUnshared(listaLibros);
+        output.writeUnshared(imageList);
         output.close();
-    }//guardarPersona\
+    }
 
     public List<ImageData> arrays() throws IOException, ClassNotFoundException {
         File myFile = new File(this.path);
 
-        List<ImageData> personaList = new ArrayList<ImageData>();
+        List<ImageData> imageList = new ArrayList<ImageData>();
         if (myFile.exists()) {
             ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(myFile));
             Object aux = objectInputStream.readObject();
-            personaList = (List<ImageData>) aux;
+            imageList = (List<ImageData>) aux;
             objectInputStream.close();
         }//if(myFile.exists())
 
-        return personaList;
-    }//obtenerPersona
+        return imageList;
+    }
 }

@@ -5,7 +5,7 @@
  */
 package proyect;
 
-import GUI.VetanaPrincipal;
+import GUI.MainWindow;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -24,7 +24,7 @@ public class Proyect {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Application.launch(VetanaPrincipal.class, args);
+        Application.launch(MainWindow.class, args);
 
     }
 

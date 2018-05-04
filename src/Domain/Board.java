@@ -6,21 +6,21 @@ import javafx.scene.image.WritableImage;
  *
  * @author Pablo Castillo
  */
-public class Tablero extends CutOutImage {
+public class Board extends CutOutImage {
 
     int Size;
     int fila;
     int columna;
     private WritableImage writable;
 
-    public Tablero() {
+    public Board() {
         this.Size = 0;
         this.fila = 0;
         this.columna = 0;
         this.writable = null;
     }
 
-    public Tablero(int x, int y, int Size, int fila, int columna, WritableImage writable) {
+    public Board(int x, int y, int Size, int fila, int columna, WritableImage writable) {
         super(x, y);
         this.Size = Size;
         this.fila = fila;
