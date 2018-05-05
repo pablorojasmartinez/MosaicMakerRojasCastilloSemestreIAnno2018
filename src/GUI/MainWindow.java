@@ -4,10 +4,14 @@ import Data.DataFile;
 import Domain.CutOutImage;
 import Domain.ImageData;
 import Domain.Board;
+import business.BusinessFile;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -46,6 +50,7 @@ import javax.swing.JOptionPane;
  */
 public class MainWindow extends Application {
 
+    //Atributos
     private final int WIDTH = 1400;
     private final int HEIGHT = 700;
     private Scene scene;
@@ -55,9 +60,9 @@ public class MainWindow extends Application {
     private Menu menu;
     private MenuItem item;
     private MenuItem loadImage;
-    private TextField text, textCanvas,txtName;
+    private TextField text, textCanvas, txtName;
     private Label label, labelCan;
-    private Button button, button2, btnFlip, btnRotate, btnSavedIamge, btnSave;
+    private Button button, button2, btnFlip, btnRotate, btnSavedIamge, btnSave, btnUnLoad;
     int PixelNumber;
     Image image;
     GraphicsContext gc;
@@ -107,11 +112,11 @@ public class MainWindow extends Application {
                 if (mouseEvent.getButton() == MouseButton.PRIMARY) {
                     if (cut.getWritable() != null) {
 //                        mat[tablero.getFila()][tablero.getColumna()].setWritable(cut.getWritable());
-                        draw2(gc, cut, board);
+                        drawCutImage(gc, cut, board);
 
                     }
                 } else if (mouseEvent.getButton() == MouseButton.MIDDLE) {
-                    draw2Deleted(gc, cut, board);
+                    deleteImage(gc, cut, board);
                 } else if (mouseEvent.getButton() == MouseButton.SECONDARY) {
                     xPressed = valueX;
                     yPressed = valueY;
@@ -120,8 +125,12 @@ public class MainWindow extends Application {
         });
 
     }//start
-
+    
+/*busca en  las cordenadas x y y de donde se presionó la imagen original y hace un recorte del tamaño de 
+    los pixeles escogidos*/
+    
     public CutOutImage searchCutImage(int x, int y) {
+
         CutOutImage board;
         for (int i = 0; i < matrix.length - 1; i++) {
             for (int j = 0; j < matrix[i].length; j++) {
@@ -135,11 +144,13 @@ public class MainWindow extends Application {
                         }
                     }
                 }
-            }
-        }
+            }//
+        }///for
         return null;
     }
-
+    
+/*busca si el lugar seleccionado en el canvas está dentro de la matriz para dibujar la imagen utilizando
+    el x y Y de la posicion q se seleccionó*/
     public Board boardSearchPlace(int x, int y) {
         Board board;
         for (int i = 0; i < mat.length; i++) {
@@ -158,7 +169,9 @@ public class MainWindow extends Application {
         }
         return null;
     }
-
+    
+/*busca si el lugar seleccionado en el canvas está dentro de la matriz para dibujar la imagen utilizando
+    el x y Y de la posición q se seleccionó solamente que en esta ocasión se guarda la imagen dentro de una  matriz para poder usarla en otros métodos*/
     public Board searchPlaceWithImages(int x, int y) {
         Board board;
         for (int i = 0; i < mat.length; i++) {
@@ -230,7 +243,7 @@ public class MainWindow extends Application {
                     btnRotate.setVisible(true);
                     btnFlip.setVisible(true);
                     btnSavedIamge.setVisible(true);
-                      btnSave.setVisible(true);
+                    btnSave.setVisible(true);
 
                 } catch (IOException ex) {
                     Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
@@ -264,10 +277,6 @@ public class MainWindow extends Application {
         labelCan.setLayoutX(750);
         labelCan.setLayoutY(30);
         this.labelCan.setVisible(false);
-        
-          txtName = new TextField();
-        txtName.setLayoutX(1100);
-        txtName.setLayoutY(650);
 
         button2 = new Button("Accept");
         button2.setLayoutX(950);
@@ -301,7 +310,9 @@ public class MainWindow extends Application {
         btnSave.setLayoutX(1050);
         this.snapshot = new SnapshotParameters();
         btnSave.setVisible(false);
-
+        btnUnLoad = new Button("Upload Project");
+        btnUnLoad.setLayoutY(650);
+        btnUnLoad.setLayoutX(1100);
         gc = canvas2.getGraphicsContext2D();
         gc.setStroke(Color.GRAY);
         gc.setFill(Color.LIGHTGRAY);
@@ -312,14 +323,15 @@ public class MainWindow extends Application {
         this.btnRotate.setOnAction(buttonActionRotate);
         this.btnFlip.setOnAction(buttonActionFlip);
         this.btnSavedIamge.setOnAction(btnSavedImage);
+        this.btnUnLoad.setOnAction(btnUnload);
         menu.getItems().add(exit);
         bar.getMenus().addAll(menu);
+        this.root.getChildren().add(this.btnUnLoad);
         this.root.getChildren().add(this.btnSave);
         this.root.getChildren().add(this.labelCan);
         this.root.getChildren().add(this.canvas);
         this.root.getChildren().add(this.canvas2);
         this.root.getChildren().add(this.text);
-        this.root.getChildren().add(this.txtName);
         this.root.getChildren().add(this.label);
         this.root.getChildren().add(this.button);
         this.root.getChildren().add(this.btnRotate);
@@ -335,15 +347,61 @@ public class MainWindow extends Application {
         bar.prefWidthProperty().bind(primaryStage.widthProperty());
         primaryStage.setScene(scene);
     }
+
+    EventHandler<ActionEvent> btnUnload = new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+            try {
+                FileChooser fileChooser = new FileChooser();
+                File file = fileChooser.showOpenDialog(null);
+                path = file.getAbsolutePath();
+
+                List<ImageData> imageList = new ArrayList<ImageData>();
+                ImageData imageData;
+                DataFile dataFile = new DataFile();
+                imageList = dataFile.arrays(path);
+                imageData = imageList.get(0);
+                /*carga la imagen original*/
+                image = new Image(new FileInputStream(imageData.getPathImageOriginal()));
+                Image image2 = new Image(new FileInputStream(imageData.getPathNewImage()));
+                GraphicsContext gc = canvas.getGraphicsContext2D();
+                GraphicsContext gc2 = canvas2.getGraphicsContext2D();
+                drawOriginalImage(gc, imageData.getPixel());
+
+                PixelNumber = imageData.getPixel();
+
+                modifiedDrawImage(gc2, image2);
+                drawLines(gc2, imageData.getSize());
+                
+                btnFlip.setVisible(true);
+                btnRotate.setVisible(true);
+                btnSave.setVisible(true);
+                btnSavedIamge.setVisible(true);
+                
+
+            } catch (IOException ex) {
+                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+    };
+
     EventHandler<ActionEvent> btnSave1 = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-          try {
-                DataFile archivo = new DataFile();
+            try {
+
+                BusinessFile businessFile = new BusinessFile();
                 ImageData imageData;
                 imageData = new ImageData(path, path2, PixelNumber, matrixSize);
+                   FileChooser fileChooser = new FileChooser();
+                 File file = fileChooser.showSaveDialog(null);
+                path = file.getAbsolutePath();
+                
 
-                archivo.saveFile(imageData, txtName.getText());
+                businessFile.saveFileBusiness(imageData, path);
             } catch (IOException ex) {
                 Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ClassNotFoundException ex) {
@@ -356,7 +414,7 @@ public class MainWindow extends Application {
         @Override
         public void handle(ActionEvent event) {
             int cantidaFilaColum = Integer.parseInt(textCanvas.getText());
-            draw3(gc, cantidaFilaColum);
+            drawLines(gc, cantidaFilaColum);
             textCanvas.setEditable(false);
             button2.setDisable(true);
         }
@@ -376,16 +434,16 @@ public class MainWindow extends Application {
     EventHandler<ActionEvent> buttonActionRotate = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-            Board tablero = searchPlaceWithImages(xPressed, yPressed);
-            dibujarImagenRotada(gc, tablero);
+            Board board = searchPlaceWithImages(xPressed, yPressed);
+            drawRotateImage(gc, board);
         }
     };
 
     EventHandler<ActionEvent> buttonActionFlip = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-            Board tablero = searchPlaceWithImages(xPressed, yPressed);
-            flipImage(gc, tablero);
+            Board board = searchPlaceWithImages(xPressed, yPressed);
+            flipImage(gc, board);
         }
     };
 
@@ -395,14 +453,15 @@ public class MainWindow extends Application {
             int numberPixel1 = Integer.parseInt(text.getText());
             GraphicsContext gc = canvas.getGraphicsContext2D();
             GraphicsContext gc2 = canvas2.getGraphicsContext2D();
-            draw(gc, numberPixel1);
+            drawOriginalImage(gc, numberPixel1);
             PixelNumber = numberPixel1;
-            //  boton.setDisable(true);
             text.setEditable(false);
         }
     };
-
-    private void draw(GraphicsContext gc, int numberPixel) {
+/*Aqui se pinta la imagen original y se parte en trozso seleccionados por los pixeles que le quiera dar el usuario
+    aparte de llenar una matriz con los datos de los trozos de la imagen para luego ser utilizados si se seleccionaran
+    */
+    private void drawOriginalImage(GraphicsContext gc, int numberPixel) {
         gc.setFill(Color.GRAY);
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
@@ -414,58 +473,58 @@ public class MainWindow extends Application {
         int x = 0;
         int y = 0;
 
-        int tamnoX = 0;
-        int tamanoY = 50;
+        int sizeX = 0;
+        int sizeY = 50;
 
-        int anch = (int) (widthImage / numberPixel);
-        int alto = (int) (largeImage / numberPixel);
+        int width = (int) (widthImage / numberPixel);
+        int height = (int) (largeImage / numberPixel);
 
-        matrix = new CutOutImage[alto][anch];
-        for (int i = 0; i < alto; i++) {
-            for (int j = 0; j < anch; j++) {
-                if (widthImage > tamnoX && largeImage > tamanoY) {
-                    if (largeImage - tamanoY > numberPixel) {
-                        this.writable = new WritableImage(this.pixel, tamnoX, tamanoY, numberPixel, numberPixel); //Lee los pixeles (imagen, xInicio, yInicio, xFin, yFin)
+        matrix = new CutOutImage[height][width];
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (widthImage > sizeX && largeImage > sizeY) {
+                    if (largeImage - sizeY > numberPixel) {
+                        this.writable = new WritableImage(this.pixel, sizeX, sizeY, numberPixel, numberPixel); //Lee los pixeles (imagen, xInicio, yInicio, xFin, yFin)
                         matrix[i][j] = new CutOutImage(x, y, writable, numberPixel);
                         gc.drawImage(this.writable, x, y);
                         x += numberPixel + 2;
-                        tamnoX += numberPixel;
+                        sizeX += numberPixel;
                     }
                 }
             }
-            if (largeImage >= tamanoY) {
+            if (largeImage >= sizeY) {
                 x = 0;
-                tamanoY += numberPixel;
-                tamnoX = 0;
+                sizeY += numberPixel;
+                sizeX = 0;
                 y += numberPixel + 2;
             }
         }
     }
-
-    private void draw2(GraphicsContext gc2, CutOutImage trozo, Board tablero) {
-        if (trozo.getWritable() != null && tablero != null) {
-            gc2.drawImage(trozo.getWritable(), tablero.getX(), tablero.getY());
-             mat[tablero.getFila()][tablero.getColumna()] = new Board(tablero.getX(), tablero.getY(), tablero.getSize(), tablero.getFila(), tablero.getColumna(), trozo.getWritable());
+/*En este métdo  se dibujan los pedazos de imagen que se seleciona con el clicker y se dibujan en el segundo lienzo*/
+    private void drawCutImage(GraphicsContext gc2, CutOutImage cutImage, Board board) {
+        if (cutImage.getWritable() != null && board != null) {
+            gc2.drawImage(cutImage.getWritable(), board.getX(), board.getY());
+            mat[board.getFila()][board.getColumna()] = new Board(board.getX(), board.getY(), board.getSize(), board.getFila(), board.getColumna(), cutImage.getWritable());
         }
     }
-
-    private void draw2Deleted(GraphicsContext gc2, CutOutImage trozo, Board tablero) {
-        if (trozo.getWritable() != null && tablero != null) {
+/*aqui se pinta un cuadro del mismo color del canvas haciendo la simulación de que se borro la imagen*/
+    private void deleteImage(GraphicsContext gc2, CutOutImage trozo, Board board) {
+        if (trozo.getWritable() != null && board != null) {
             gc2.setFill(Color.LIGHTGREY);
-            gc2.fillRect(tablero.getX(), tablero.getY(), tablero.getSize(), tablero.getSize());
-            gc2.strokeRect(tablero.getX(), tablero.getY(), tablero.getSize(), tablero.getSize());
+            gc2.fillRect(board.getX(), board.getY(), board.getSize(), board.getSize());
+            gc2.strokeRect(board.getX(), board.getY(), board.getSize(), board.getSize());
         }
     }
-
-    private void draw3(GraphicsContext gc2, int cantidad) {
+/*Aquí se pintan la rayas de la matriz del canvas2 lo que hace simular una matriz donde se van a pegar los trozos de la imagen*/
+    private void drawLines(GraphicsContext gc2, int amount) {
         int x = 0;
         int y = 0;
         int numberPixel = PixelNumber;
-        matrixSize = cantidad;
-        mat = new Board[cantidad][cantidad];
-        boardMatrix = new CutOutImage[cantidad][cantidad];
-        for (int i = 0; i < cantidad; i++) {
-            for (int j = 0; j < cantidad; j++) {
+        matrixSize = amount;
+        mat = new Board[amount][amount];
+        boardMatrix = new CutOutImage[amount][amount];
+        for (int i = 0; i < amount; i++) {
+            for (int j = 0; j < amount; j++) {
                 gc2.strokeRect(x, y, numberPixel, numberPixel);
                 mat[i][j] = new Board(x, y, numberPixel, i, j, null);
                 boardMatrix[i][j] = new CutOutImage(x, y, null, numberPixel);
@@ -475,71 +534,73 @@ public class MainWindow extends Application {
             x = 0;
         }
     }
-
-    private void dibujarImagenRotada(GraphicsContext gc, Board tablero) {
+/*dibuja la imagen rotada */
+    private void drawRotateImage(GraphicsContext gc, Board board) {
 
         WritableImage writable1;
 
-        this.imageView = new ImageView(tablero.getWritable());
+        this.imageView = new ImageView(board.getWritable());
         this.snapshot = new SnapshotParameters();
 
         this.imageView.setRotate(imageView.getRotate() + 90); //rota la imagen 90 grados sentido del reloj
         this.image = imageView.snapshot(snapshot, null);
         this.pixel = this.image.getPixelReader();
-        writable1 = new WritableImage(this.pixel, 0, 0, tablero.getSize(), tablero.getSize()); //Lee los pixeles (imagen, xInici
-        tablero.setWritable(writable1);
+        writable1 = new WritableImage(this.pixel, 0, 0, board.getSize(), board.getSize()); //Lee los pixeles (imagen, xInici
+        board.setWritable(writable1);
 
-        gc.drawImage(tablero.getWritable(), tablero.getX(), tablero.getY(), tablero.getSize(), tablero.getSize());
-        mat[tablero.getFila()][tablero.getColumna()].setWritable(writable1);
+        gc.drawImage(board.getWritable(), board.getX(), board.getY(), board.getSize(), board.getSize());
+        mat[board.getFila()][board.getColumna()].setWritable(writable1);
     }
-
-    private void flipImage(GraphicsContext gc, Board tablero) {
+/*dibuja la imagen flip*/
+    private void flipImage(GraphicsContext gc, Board board) {
 
         WritableImage writable1;
 
-        this.imageView = new ImageView(tablero.getWritable());
+        this.imageView = new ImageView(board.getWritable());
         imageView.setTranslateZ(imageView.getBoundsInLocal().getWidth() / 2.0);
         imageView.setRotate(180);
         imageView.setRotationAxis(Rotate.Y_AXIS);
         this.snapshot = new SnapshotParameters();
         this.image = imageView.snapshot(snapshot, null);
         this.pixel = this.image.getPixelReader();
-        writable1 = new WritableImage(this.pixel, 0, 0, tablero.getSize(), tablero.getSize()); //Lee los pixeles (imagen, xInici
-        tablero.setWritable(writable1);
-        gc.drawImage(tablero.getWritable(), tablero.getX(), tablero.getY(), tablero.getSize(), tablero.getSize());
-        mat[tablero.getFila()][tablero.getColumna()].setWritable(writable1);
+        writable1 = new WritableImage(this.pixel, 0, 0, board.getSize(), board.getSize()); //Lee los pixeles (imagen, xInici
+        board.setWritable(writable1);
+        gc.drawImage(board.getWritable(), board.getX(), board.getY(), board.getSize(), board.getSize());
+        mat[board.getFila()][board.getColumna()].setWritable(writable1);
     }
-
+/*lo que hace el metodo es hacer una captura de los componentes del canvas */
     public void exportImage() throws IOException {
 
         gc.clearRect(0, 0, canvas2.getWidth(), canvas2.getHeight());
-        repintar();
+        repaint();
         FileChooser fileChooser = new FileChooser();
         File file = fileChooser.showSaveDialog(null);
-        WritableImage imagenss = this.canvas2.snapshot(new SnapshotParameters(), null);
-        File fileI = new File("imagen");
-        ImageIO.write(SwingFXUtils.fromFXImage(imagenss, null), "png", file);
-        String ruta = file.getAbsolutePath();
-        draw3(gc, matrixSize);
-        path2 = ruta;
+        WritableImage images = this.canvas2.snapshot(new SnapshotParameters(), null);
+        File fileI = new File("image");
+        ImageIO.write(SwingFXUtils.fromFXImage(images, null), "png", file);
+        String path = file.getAbsolutePath();
+        drawLines(gc, matrixSize);
+        path2 = path;
     }
-
-    public void repintar() throws IOException {
-//         Board tablero = boardSearchPlace(valorx, valory);
+/*repinta las imagenes solamente*/
+    public void repaint() throws IOException {
         for (int i = 0; i < mat.length; i++) {
             for (int j = 0; j < mat.length; j++) {
                 if (mat[j][i].getWritable() != null) {
-                    drawNuevoPanel(gc, mat[j][i]);
+                    drawNewPanel(gc, mat[j][i]);
                 }
             }
         }
     }
-    
-    
-       private void drawNuevoPanel(GraphicsContext gc2, Board tablero) {
-        if (tablero.getWritable() != null && tablero != null) {
-            gc2.drawImage(tablero.getWritable(), tablero.getX(), tablero.getY());
-//             mat[tablero.getFila()][tablero.getColumna()] = new Board(tablero.getX(), tablero.getY(), tablero.getSize(), tablero.getFila(), tablero.getColumna(), tablero.getWritable());
+
+    private void drawNewPanel(GraphicsContext gc2, Board board) {
+        if (board.getWritable() != null && board != null) {
+            gc2.drawImage(board.getWritable(), board.getX(), board.getY());
         }
+    }
+    
+/*lo que hace es pintar la imagen cargada de un proyecto anterior*/
+    private void modifiedDrawImage(GraphicsContext gc2, Image image2) {
+        gc2.drawImage(image2, 0, 0);
     }
 }

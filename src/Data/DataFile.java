@@ -21,13 +21,15 @@ import java.util.List;
  */
 public class DataFile {
 
+    //Atributos
     private String path;
 
     public DataFile() {
-//        this.path="ArchivoLibros";
-    }
+    }//constructor
 
-    public void saveFile(ImageData libro, String path) throws IOException, ClassNotFoundException {
+    //Este método recibe por parametros un atributo de tipo ImageData y un atributoString que pertenece a una dirección
+    //Sirve para crear y guardar en un archivo los atributos arriba mencionados.
+    public void saveFile(ImageData imageData, String path) throws IOException, ClassNotFoundException {
         this.path = path;
         File myFile = new File(path);
         List<ImageData> imageList = new ArrayList<ImageData>();
@@ -39,14 +41,15 @@ public class DataFile {
             objectInputStream.close();
         }//if(myFile.exists())
 
-        imageList.add(libro);
+        imageList.add(imageData);
         ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(myFile));
         output.writeUnshared(imageList);
         output.close();
     }
-
-    public List<ImageData> arrays() throws IOException, ClassNotFoundException {
-        File myFile = new File(this.path);
+    
+    //Este método guarda en  un arrayList de tipo ImageData.
+    public List<ImageData> arrays(String path) throws IOException, ClassNotFoundException {
+        File myFile = new File(path);
 
         List<ImageData> imageList = new ArrayList<ImageData>();
         if (myFile.exists()) {

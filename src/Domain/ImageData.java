@@ -9,33 +9,35 @@ import java.io.Serializable;
  */
 public class ImageData implements Serializable{
     
-    private String pathImageOriginal;
+    //Atributos
+    private String pathOriginalImage;
     private String pathNewImage;
     private int pixel;
     private int size;
     
     
     public ImageData(){
-    this.pathImageOriginal="";
+    this.pathOriginalImage="";
     this.pathNewImage="";
     this.pixel=0;
     this.size=0;
-    
-    }
+    }//constructor
 
     public ImageData(String pathImageOriginal, String pathNewImage, int pixel, int size) {
-        this.pathImageOriginal = pathImageOriginal;
+        this.pathOriginalImage = pathImageOriginal;
         this.pathNewImage = pathNewImage;
         this.pixel = pixel;
         this.size = size;
-    }
+    }//constructor sobrecargado
+    
+    //Sets && gets
 
     public String getPathImageOriginal() {
-        return pathImageOriginal;
+        return pathOriginalImage;
     }
 
     public void setPathImageOriginal(String pathImageOriginal) {
-        this.pathImageOriginal = pathImageOriginal;
+        this.pathOriginalImage = pathImageOriginal;
     }
 
     public String getPathNewImage() {
@@ -62,9 +64,10 @@ public class ImageData implements Serializable{
         this.size = size;
     }
 
+    //toString
     @Override
     public String toString() {
-        return "ImageData{" + "pathImageOriginal=" + pathImageOriginal + ", pathNewImage=" + pathNewImage + ", pixel=" + pixel + ", size=" + size + '}';
+        return "ImageData{" + "pathImageOriginal=" + pathOriginalImage + ", pathNewImage=" + pathNewImage + ", pixel=" + pixel + ", size=" + size + '}';
     }
     
 }

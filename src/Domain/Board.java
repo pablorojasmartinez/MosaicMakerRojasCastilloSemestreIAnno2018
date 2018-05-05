@@ -8,26 +8,29 @@ import javafx.scene.image.WritableImage;
  */
 public class Board extends CutOutImage {
 
-    int Size;
-    int fila;
-    int columna;
+    //Atributos
+    int size;
+    int row;
+    int column;
     private WritableImage writable;
 
     public Board() {
-        this.Size = 0;
-        this.fila = 0;
-        this.columna = 0;
+        this.size = 0;
+        this.row = 0;
+        this.column = 0;
         this.writable = null;
-    }
+    }//Constructor
 
     public Board(int x, int y, int Size, int fila, int columna, WritableImage writable) {
         super(x, y);
-        this.Size = Size;
-        this.fila = fila;
-        this.columna = columna;
+        this.size = Size;
+        this.row = fila;
+        this.column = columna;
         this.writable = writable;
-    }
+    }//constructor sobrecargado
 
+    //sets && gets 
+    
     public WritableImage getWritable() {
         return writable;
     }
@@ -37,27 +40,27 @@ public class Board extends CutOutImage {
     }
 
     public int getSize() {
-        return Size;
+        return size;
     }
 
     public void setSize(int Size) {
-        this.Size = Size;
+        this.size = Size;
     }
 
     public int getFila() {
-        return fila;
+        return row;
     }
 
     public void setFila(int fila) {
-        this.fila = fila;
+        this.row = fila;
     }
 
     public int getColumna() {
-        return columna;
+        return column;
     }
 
     public void setColumna(int columna) {
-        this.columna = columna;
+        this.column = columna;
     }
 
 }
