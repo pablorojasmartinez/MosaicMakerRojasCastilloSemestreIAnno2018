@@ -14,6 +14,7 @@ import javafx.application.Application;
  */
 public class Proyect {
 
+    
     /**
      * @param args the command line arguments
      */
