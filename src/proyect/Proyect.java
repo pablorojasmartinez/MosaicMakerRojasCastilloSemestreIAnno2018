@@ -19,7 +19,6 @@ public class Proyect {
      */
     public static void main(String[] args) {
         Application.launch(MainWindow.class, args);
-
     }
 
 }
