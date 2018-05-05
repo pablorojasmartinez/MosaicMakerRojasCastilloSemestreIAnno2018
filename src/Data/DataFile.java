@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 package Data;
-
+  
 import Domain.ImageData;
 import java.io.File;
 import java.io.FileInputStream;
