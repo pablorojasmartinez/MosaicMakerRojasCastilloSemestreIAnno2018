@@ -5,7 +5,7 @@
  */
 package proyect;
 
-import GUI.MainWindow;
+import gui.MainWindow;
 import javafx.application.Application;
 
 /**
@@ -14,7 +14,6 @@ import javafx.application.Application;
  */
 public class Proyect {
 
-    
     /**
      * @param args the command line arguments
      */
