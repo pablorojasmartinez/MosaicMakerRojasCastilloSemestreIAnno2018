@@ -70,7 +70,7 @@ public class MainWindow extends Application {
     Image image;
     GraphicsContext gc;
     Group root;
-    private WritableImage writable; //convierte pixeles en una imagen
+    private WritableImage writable; 
     private PixelReader pixel;
     Stage stage;
     CutOutImage[][] matrix;
@@ -81,7 +81,7 @@ public class MainWindow extends Application {
     int xPressed;
     int yPressed;
 
-    private ImageView imageView; //modifica una imagen
+    private ImageView imageView; 
     private SnapshotParameters snapshot;
 
     String path = "";
