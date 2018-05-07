@@ -65,7 +65,7 @@ public class MainWindow extends Application {
     private MenuItem loadImage;
     private TextField text, textCanvas, txtName;
     private Label label, labelCan;
-    private Button button, button2, btnFlip, btnRotate, btnSavedIamge, btnSave, btnUpload;
+    private Button button, button2, btnFlip, btnRotate, btnRotateLeft,btnSavedIamge, btnSave, btnUpload;
     int PixelNumber;
     Image image;
     GraphicsContext gc;
@@ -298,14 +298,19 @@ public class MainWindow extends Application {
         scroll2.setLayoutY(80);
         scroll2.setContent(canvas2);
 
-        btnRotate = new Button("Rotate");
+        btnRotate = new Button("Rotate Right");
         btnRotate.setLayoutX(800);
         btnRotate.setLayoutY(650);
-        btnRotate.setVisible(false);
+        btnRotate.setVisible(true);
+        
+         btnRotateLeft = new Button("Rotate Left");
+        btnRotateLeft.setLayoutX(889);
+        btnRotateLeft.setLayoutY(650);
+        btnRotateLeft.setVisible(true);
 
         btnFlip = new Button("Flip");
         btnFlip.setLayoutY(650);
-        btnFlip.setLayoutX(900);
+        btnFlip.setLayoutX(750);
         btnFlip.setVisible(false);
 
         btnSavedIamge = new Button("Save Image");
@@ -332,6 +337,7 @@ public class MainWindow extends Application {
         this.button2.setOnAction(buttonAction1);
         this.button.setOnAction(buttonAction);
         this.btnRotate.setOnAction(buttonActionRotate);
+        this.btnRotateLeft.setOnAction(buttonActionRotateLeft);
         this.btnFlip.setOnAction(buttonActionFlip);
         this.btnSavedIamge.setOnAction(btnSavedImage);
         this.btnUpload.setOnAction(btnUnload);
@@ -348,6 +354,7 @@ public class MainWindow extends Application {
         this.root.getChildren().add(this.label);
         this.root.getChildren().add(this.button);
         this.root.getChildren().add(this.btnRotate);
+        this.root.getChildren().add(this.btnRotateLeft);
         this.root.getChildren().add(this.btnFlip);
         this.root.getChildren().add(this.textCanvas);
         this.root.getChildren().add(this.button2);
@@ -388,6 +395,7 @@ public class MainWindow extends Application {
 
                 btnFlip.setVisible(true);
                 btnRotate.setVisible(true);
+                btnRotateLeft.setVisible(true);
                 btnSave.setVisible(true);
                 btnSavedIamge.setVisible(true);
 
@@ -447,6 +455,17 @@ public class MainWindow extends Application {
         public void handle(ActionEvent event) {
             Board board = searchPlaceWithImages(xPressed, yPressed);
             drawRotateImage(gc, board);
+         //   drawRotateImageLeft(gc, board);
+        }
+    };
+    
+    
+    EventHandler<ActionEvent> buttonActionRotateLeft = new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+            Board board = searchPlaceWithImages(xPressed, yPressed);
+           // drawRotateImage(gc, board);
+            drawRotateImageLeft(gc, board);
         }
     };
 
@@ -568,6 +587,24 @@ public class MainWindow extends Application {
         mat[board.getFila()][board.getColumna()].setWritable(writable1);
     }
 
+    
+     private void drawRotateImageLeft(GraphicsContext gc, Board board) {
+
+        WritableImage writable1;
+
+        this.imageView = new ImageView(board.getWritable());
+        this.snapshot = new SnapshotParameters();
+
+        this.imageView.setRotate(imageView.getRotate() - 90); //rota la imagen 90 grados sentido del reloj
+        this.image = imageView.snapshot(snapshot, null);
+        this.pixel = this.image.getPixelReader();
+        writable1 = new WritableImage(this.pixel, 0, 0, board.getSize(), board.getSize()); //Lee los pixeles (imagen, xInici
+        board.setWritable(writable1);
+
+        gc.drawImage(board.getWritable(), board.getX(), board.getY(), board.getSize(), board.getSize());
+        mat[board.getFila()][board.getColumna()].setWritable(writable1);
+    }
+    
     /*dibuja la imagen flip*/
     private void flipImage(GraphicsContext gc, Board board) {
 
